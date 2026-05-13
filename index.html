@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AAROK — Carte de visite</title>
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Orbitron:wght@400;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pink:#ff2cae;
+    --magenta:#ff007f;
+    --purple:#8a2be2;
+    --cyan:#00f0ff;
+    --yellow:#ffcc00;
+    --orange:#ff6a00;
+    --bg-deep:#0a0420;
+    --bg-mid:#1a0936;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow-x:hidden}
+  body{
+    font-family:'Orbitron',sans-serif;
+    color:#fff;
+    background:radial-gradient(ellipse at top, #2a0a4a 0%, var(--bg-deep) 50%, #000 100%);
+    min-height:100vh;
+    position:relative;
+  }
+
+  /* Étoiles animées */
+  .stars{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .star{position:absolute;background:#fff;border-radius:50%;animation:twinkle linear infinite}
+  @keyframes twinkle{
+    0%,100%{opacity:0.1;transform:scale(1)}
+    50%{opacity:1;transform:scale(1.5)}
+  }
+
+  /* Grille rétro au sol */
+  .grid-floor{
+    position:fixed;
+    bottom:0;left:0;right:0;
+    height:55vh;
+    perspective:400px;
+    z-index:1;
+    pointer-events:none;
+  }
+  .grid-floor::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background-image:
+      linear-gradient(rgba(255,44,174,0.7) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,240,255,0.5) 1px, transparent 1px);
+    background-size:60px 60px;
+    transform:rotateX(60deg);
+    transform-origin:bottom;
+    animation:gridMove 8s linear infinite;
+  }
+  .grid-floor::after{
+    content:'';
+    position:absolute;inset:0;
+    background:linear-gradient(to top, transparent 0%, var(--bg-deep) 90%);
+  }
+  @keyframes gridMove{
+    0%{background-position:0 0}
+    100%{background-position:0 60px}
+  }
+
+  /* Soleil rétro en arrière-plan */
+  .sun-bg{
+    position:fixed;
+    bottom:35vh;
+    left:50%;
+    transform:translateX(-50%);
+    width:400px;height:400px;
+    z-index:0;
+    pointer-events:none;
+    opacity:0.35;
+  }
+  .sun-bg::before{
+    content:'';
+    position:absolute;inset:0;
+    border-radius:50%;
+    background:radial-gradient(circle, var(--yellow) 0%, var(--orange) 35%, var(--magenta) 65%, transparent 80%);
+    filter:blur(20px);
+    animation:pulse 4s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{transform:scale(1);opacity:0.6}
+    50%{transform:scale(1.1);opacity:0.9}
+  }
+
+  /* Container principal */
+  .container{
+    position:relative;
+    z-index:10;
+    max-width:900px;
+    margin:0 auto;
+    padding:60px 24px 80px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  /* LOGO (recréation SVG du style AAROK) */
+  .logo-wrap{
+    position:relative;
+    width:260px;
+    height:260px;
+    margin-bottom:30px;
+    animation:floaty 6s ease-in-out infinite;
+  }
+  @keyframes floaty{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-12px)}
+  }
+  .logo-wrap::before{
+    content:'';
+    position:absolute;
+    inset:-20px;
+    border-radius:50%;
+    background:conic-gradient(from 0deg, var(--cyan), var(--magenta), var(--purple), var(--cyan));
+    filter:blur(30px);
+    opacity:0.55;
+    animation:rotateGlow 8s linear infinite;
+    z-index:-1;
+  }
+  @keyframes rotateGlow{
+    to{transform:rotate(360deg)}
+  }
+  .logo-svg{
+    width:100%;height:100%;
+    filter:drop-shadow(0 0 25px rgba(255,44,174,0.6));
+  }
+
+  /* Titre */
+  .title{
+    font-family:'Audiowide','Orbitron',sans-serif;
+    font-size:clamp(40px,7vw,76px);
+    font-weight:900;
+    letter-spacing:6px;
+    background:linear-gradient(90deg, var(--cyan), var(--pink), var(--yellow), var(--cyan));
+    background-size:300% auto;
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    animation:shine 4s linear infinite;
+    text-shadow:0 0 30px rgba(255,44,174,0.3);
+    margin-bottom:8px;
+  }
+  @keyframes shine{
+    to{background-position:300% center}
+  }
+
+  .subtitle{
+    font-family:'Press Start 2P',monospace;
+    font-size:11px;
+    letter-spacing:4px;
+    color:var(--cyan);
+    text-shadow:0 0 10px var(--cyan);
+    margin-bottom:8px;
+    text-transform:uppercase;
+  }
+
+  .tagline{
+    font-size:14px;
+    color:#cbb4f5;
+    letter-spacing:2px;
+    margin-bottom:45px;
+    text-align:center;
+    opacity:0.9;
+  }
+
+  /* Grille de liens */
+  .links{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:18px;
+    width:100%;
+    max-width:720px;
+  }
+
+  .link-card{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:18px 22px;
+    background:rgba(20,8,45,0.55);
+    border:1px solid rgba(255,44,174,0.35);
+    border-radius:14px;
+    text-decoration:none;
+    color:#fff;
+    overflow:hidden;
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    transition:transform .35s cubic-bezier(.2,.8,.3,1.2), border-color .3s, box-shadow .3s;
+    opacity:0;
+    transform:translateY(20px);
+    animation:rise .6s forwards;
+  }
+  .link-card:nth-child(1){animation-delay:.1s}
+  .link-card:nth-child(2){animation-delay:.2s}
+  .link-card:nth-child(3){animation-delay:.3s}
+  .link-card:nth-child(4){animation-delay:.4s}
+  .link-card:nth-child(5){animation-delay:.5s}
+  @keyframes rise{
+    to{opacity:1;transform:translateY(0)}
+  }
+
+  .link-card::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%);
+    transform:translateX(-100%);
+    transition:transform .8s;
+  }
+  .link-card:hover{
+    transform:translateY(-6px) scale(1.03);
+    border-color:var(--cyan);
+    box-shadow:0 10px 40px -5px rgba(0,240,255,0.5),
+               0 0 30px rgba(255,44,174,0.4);
+  }
+  .link-card:hover::before{transform:translateX(100%)}
+
+  .icon{
+    width:50px;height:50px;
+    flex-shrink:0;
+    display:grid;place-items:center;
+    border-radius:12px;
+    background:linear-gradient(135deg, rgba(255,44,174,0.25), rgba(0,240,255,0.25));
+    border:1px solid rgba(255,255,255,0.15);
+  }
+  .icon svg{width:26px;height:26px;fill:#fff}
+
+  .link-text{display:flex;flex-direction:column;min-width:0;flex:1}
+  .platform{
+    font-family:'Audiowide',sans-serif;
+    font-size:16px;
+    letter-spacing:2px;
+    color:#fff;
+    line-height:1.2;
+  }
+  .handle{
+    font-size:12px;
+    color:#9d8bcf;
+    margin-top:3px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  /* Couleurs par plateforme */
+  .yt .icon{background:linear-gradient(135deg,#ff0000,#aa0000);border-color:#ff5555}
+  .yt:hover{border-color:#ff3a3a;box-shadow:0 10px 40px -5px rgba(255,0,0,0.6)}
+
+  .tk .icon{background:linear-gradient(135deg,#25F4EE,#FE2C55);border-color:#fff}
+  .tk:hover{border-color:#FE2C55;box-shadow:0 10px 40px -5px rgba(254,44,85,0.6)}
+
+  .gh .icon{background:linear-gradient(135deg,#333,#666);border-color:#999}
+  .gh:hover{border-color:#fff;box-shadow:0 10px 40px -5px rgba(255,255,255,0.4)}
+
+  .thm .icon{background:linear-gradient(135deg,#88cc14,#5a8a0c);border-color:#b8ff44}
+  .thm:hover{border-color:#88cc14;box-shadow:0 10px 40px -5px rgba(136,204,20,0.6)}
+
+  .tw .icon{background:linear-gradient(135deg,#9146FF,#5c2cab);border-color:#b388ff}
+  .tw:hover{border-color:#9146FF;box-shadow:0 10px 40px -5px rgba(145,70,255,0.6)}
+
+  /* Footer */
+  .footer{
+    margin-top:50px;
+    text-align:center;
+    font-family:'Press Start 2P',monospace;
+    font-size:9px;
+    color:#7a5dad;
+    letter-spacing:3px;
+    opacity:0.7;
+  }
+  .footer span{color:var(--cyan);text-shadow:0 0 8px var(--cyan)}
+
+  /* Scanline effet CRT */
+  body::after{
+    content:'';
+    position:fixed;
+    inset:0;
+    background:linear-gradient(rgba(255,255,255,0) 50%, rgba(0,0,0,0.08) 50%);
+    background-size:100% 4px;
+    pointer-events:none;
+    z-index:100;
+    opacity:0.4;
+  }
+
+  @media(max-width:500px){
+    .logo-wrap{width:200px;height:200px}
+    .title{letter-spacing:4px}
+    .container{padding:40px 16px 60px}
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div class="sun-bg"></div>
+<div class="grid-floor"></div>
+
+<div class="container">
+
+  <!-- LOGO -->
+  <div class="logo-wrap">
+    <svg class="logo-svg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="bgGrad" cx="50%" cy="40%" r="70%">
+          <stop offset="0%" stop-color="#3a1a6a"/>
+          <stop offset="60%" stop-color="#1a0a3a"/>
+          <stop offset="100%" stop-color="#0a0420"/>
+        </radialGradient>
+        <linearGradient id="sunGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ffcc00"/>
+          <stop offset="50%" stop-color="#ff6a00"/>
+          <stop offset="100%" stop-color="#ff007f"/>
+        </linearGradient>
+        <linearGradient id="textGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ff2cae"/>
+          <stop offset="100%" stop-color="#8a2be2"/>
+        </linearGradient>
+        <clipPath id="circleClip">
+          <circle cx="150" cy="150" r="140"/>
+        </clipPath>
+      </defs>
+
+      <!-- Cercle de fond -->
+      <circle cx="150" cy="150" r="140" fill="url(#bgGrad)" stroke="#ff2cae" stroke-width="2"/>
+
+      <g clip-path="url(#circleClip)">
+        <!-- Étoiles -->
+        <circle cx="60" cy="60" r="1.2" fill="#fff"/>
+        <circle cx="90" cy="40" r="0.8" fill="#fff"/>
+        <circle cx="220" cy="55" r="1" fill="#fff"/>
+        <circle cx="250" cy="80" r="1.5" fill="#fff"/>
+        <circle cx="40" cy="100" r="0.7" fill="#fff"/>
+        <circle cx="200" cy="35" r="1" fill="#fff"/>
+        <circle cx="160" cy="50" r="0.9" fill="#fff"/>
+        <circle cx="270" cy="120" r="0.8" fill="#fff"/>
+        <circle cx="30" cy="140" r="1" fill="#fff"/>
+
+        <!-- Soleil -->
+        <circle cx="150" cy="155" r="55" fill="url(#sunGrad)"/>
+        <!-- Bandes du soleil -->
+        <rect x="95" y="155" width="110" height="3" fill="#1a0a3a"/>
+        <rect x="95" y="165" width="110" height="4" fill="#1a0a3a"/>
+        <rect x="95" y="178" width="110" height="5" fill="#1a0a3a"/>
+        <rect x="95" y="193" width="110" height="6" fill="#1a0a3a"/>
+
+        <!-- Montagnes / triangles en wireframe -->
+        <g stroke="#00f0ff" stroke-width="1.2" fill="none" opacity="0.9">
+          <polyline points="0,230 50,200 90,225 130,195 170,220 210,190 250,215 300,200"/>
+          <polyline points="0,250 30,230 70,250 110,225 150,250 190,225 230,250 270,230 300,245"/>
+          <line x1="0" y1="230" x2="0" y2="300"/>
+          <line x1="50" y1="200" x2="50" y2="300"/>
+          <line x1="90" y1="225" x2="90" y2="300"/>
+          <line x1="130" y1="195" x2="130" y2="300"/>
+          <line x1="170" y1="220" x2="170" y2="300"/>
+          <line x1="210" y1="190" x2="210" y2="300"/>
+          <line x1="250" y1="215" x2="250" y2="300"/>
+        </g>
+
+        <!-- Grille rétro au sol -->
+        <g stroke="#ff2cae" stroke-width="0.8" fill="none" opacity="0.7">
+          <line x1="0" y1="260" x2="300" y2="260"/>
+          <line x1="0" y1="275" x2="300" y2="275"/>
+          <line x1="0" y1="290" x2="300" y2="290"/>
+          <line x1="150" y1="250" x2="20" y2="300"/>
+          <line x1="150" y1="250" x2="80" y2="300"/>
+          <line x1="150" y1="250" x2="120" y2="300"/>
+          <line x1="150" y1="250" x2="150" y2="300"/>
+          <line x1="150" y1="250" x2="180" y2="300"/>
+          <line x1="150" y1="250" x2="220" y2="300"/>
+          <line x1="150" y1="250" x2="280" y2="300"/>
+        </g>
+
+        <!-- AAROK Text -->
+        <text x="150" y="135" text-anchor="middle"
+              font-family="Audiowide, Orbitron, sans-serif"
+              font-size="46" font-weight="900"
+              fill="url(#textGrad)"
+              stroke="#00f0ff" stroke-width="1"
+              letter-spacing="2">AAROK</text>
+      </g>
+
+      <!-- Bordure -->
+      <circle cx="150" cy="150" r="140" fill="none" stroke="#ff2cae" stroke-width="3"/>
+      <circle cx="150" cy="150" r="143" fill="none" stroke="#00f0ff" stroke-width="1" opacity="0.6"/>
+    </svg>
+  </div>
+
+  <div class="subtitle">// Gaming • Tech • Stream</div>
+  <h1 class="title">AAROK</h1>
+  <p class="tagline">Bienvenue dans mon univers — Choisis ta plateforme</p>
+
+  <!-- LIENS -->
+  <div class="links">
+
+    <a href="https://www.youtube.com/@aarok.gaming" target="_blank" rel="noopener" class="link-card yt">
+      <div class="icon">
+        <svg viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1 31 31 0 0 0 .5-5.8 31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6z"/></svg>
+      </div>
+      <div class="link-text">
+        <span class="platform">YouTube</span>
+        <span class="handle">@aarok.gaming</span>
+      </div>
+    </a>
+
+    <a href="https://www.tiktok.com/@aarok.tv" target="_blank" rel="noopener" class="link-card tk">
+      <div class="icon">
+        <svg viewBox="0 0 24 24"><path d="M19.6 6.3a4.8 4.8 0 0 1-3.8-4.3h-3v15.4a2.7 2.7 0 0 1-4.9 1.6 2.7 2.7 0 0 1 3.9-3.5V12a5.8 5.8 0 0 0-6.7 5.8 5.8 5.8 0 0 0 9.8 4.1 5.7 5.7 0 0 0 1.6-4V9.6a8 8 0 0 0 4.5 1.4V8a4.8 4.8 0 0 1-1.4-.2 4.7 4.7 0 0 1 0-1.5z"/></svg>
+      </div>
+      <div class="link-text">
+        <span class="platform">TikTok</span>
+        <span class="handle">@aarok.tv</span>
+      </div>
+    </a>
+
+    <a href="https://www.twitch.tv/aar0ck" target="_blank" rel="noopener" class="link-card tw">
+      <div class="icon">
+        <svg viewBox="0 0 24 24"><path d="M4.3 2L2 6.5v14h5V23h3l2.5-2.5h4L21.5 15V2H4.3zm15.2 12L17 16.5h-4L10.5 19v-2.5H7V4h12.5V14zM16 7h-2v5h2V7zm-5 0H9v5h2V7z"/></svg>
+      </div>
+      <div class="link-text">
+        <span class="platform">Twitch</span>
+        <span class="handle">@aar0ck</span>
+      </div>
+    </a>
+
+    <a href="https://tryhackme.com/p/AAROK" target="_blank" rel="noopener" class="link-card thm">
+      <div class="icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7v5c0 5.5 4 10.7 10 12 6-1.3 10-6.5 10-12V7l-10-5zm-1 16l-5-5 1.4-1.4L11 15.2l6.6-6.6L19 10l-8 8z"/></svg>
+      </div>
+      <div class="link-text">
+        <span class="platform">TryHackMe</span>
+        <span class="handle">Cybersécurité — AAROK</span>
+      </div>
+    </a>
+
+    <a href="https://k413mp3r4.github.io/AAROK/" target="_blank" rel="noopener" class="link-card gh">
+      <div class="icon">
+        <svg viewBox="0 0 24 24"><path d="M12 0a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.9 1.3 1.9 1.3 1.1 1.9 2.9 1.3 3.6 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.3-3.2-.1-.3-.6-1.6.1-3.3 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.2 3 .1 3.3.8.8 1.3 1.9 1.3 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 0z"/></svg>
+      </div>
+      <div class="link-text">
+        <span class="platform">Site officiel</span>
+        <span class="handle">k413mp3r4.github.io/AAROK</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="footer">
+    <span>&gt;</span> SYSTEM ONLINE <span>&lt;</span> &nbsp; © 2026 AAROK
+  </div>
+
+</div>
+
+<script>
+  // Génération des étoiles
+  const starsBox = document.getElementById('stars');
+  for(let i=0; i<120; i++){
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2 + 0.5;
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 70 + '%';
+    s.style.animationDuration = (Math.random() * 3 + 2) + 's';
+    s.style.animationDelay = Math.random() * 5 + 's';
+    starsBox.appendChild(s);
+  }
+
+  // Effet parallax léger sur le logo
+  const logo = document.querySelector('.logo-wrap');
+  document.addEventListener('mousemove', (e) => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 20;
+    const y = (e.clientY / window.innerHeight - 0.5) * 20;
+    logo.style.transform = `translate(${x}px, ${y}px)`;
+  });
+</script>
+
+</body>
+</html>
