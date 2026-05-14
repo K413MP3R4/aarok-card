@@ -1,3 +1,5 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 # AAROK Card
 
 Carte de visite interactive AAROK — Tous mes liens en un seul endroit.
@@ -13,3 +15,7 @@ Carte de visite interactive AAROK — Tous mes liens en un seul endroit.
 - 🎬 Twitch: @aar0ck
 - 🛡️ TryHackMe: AAROK (CyberSécurité)
 - 🌐 Site officiel: https://k413mp3r4.github.io/AAROK/
+
+## Licence
+
+MIT License - voir [LICENSE](LICENSE)
