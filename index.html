@@ -512,7 +512,7 @@
   </div>
 
   <div class="footer">
-    <span>&gt;</span> SYSTEM ONLINE <span>&lt;</span> &nbsp; © 2026 AAROK
+    <span>&gt;</span> SYSTEM ONLINE <span>&lt;</span> &nbsp; © <span id="yr"></span> AAROK
   </div>
 
 </div>
@@ -542,5 +542,6 @@
   });
 </script>
 
+<script>document.getElementById("yr").textContent=new Date().getFullYear();</script>
 </body>
 </html>
